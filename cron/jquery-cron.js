@@ -166,7 +166,7 @@
     var toDisplay = {
         "second" : [],
         "minute" : ["secs"],
-        "hour"   : ["mins"],
+        "hour"   : ["mins", "secs"],
         "day"    : ["time"],
         "week"   : ["dow", "time"],
         "month"  : ["dom", "time"],
@@ -369,15 +369,23 @@
 
             // ---- minutes selection ----
 
-            block["mins"] = $("<span class='cron-block cron-block-mins'>"
-                    + " at <select name='cron-mins'>" + str_opt_mih
-                    + "</select> minutes past the hour </span>")
+            block["mins"] = $("<span class='cron-block cron-block-hm'>"
+                    + " at <select class='cron-mins'>" + str_opt_mih
+                    + "</select> minutes and </span>")
                 .appendTo(this)
                 .data("root", this)
-                .find("select");
+                .find("select.cron-mins");
 
             if (o.useGentleSelect) {
                 block["mins"].gentleSelect(o.minuteOpts);
+            }
+
+            block["mins"] = block["mins"].data("root", this)
+                                         .end()
+                                         .find('select.cron-secs');
+
+            if (o.useGentleSelect) {
+                block["mins"].gentleSelect(o.secondOpts);
             }
 
             block["mins"] = block["mins"].data("root", this)
@@ -386,7 +394,7 @@
             // ---- seconds selection ----
 
             block["secs"] = $("<span class='cron-block cron-block-secs'>"
-                    + " at <select name='cron-secs'>" + str_opt_sim
+                    + " <select name='cron-secs'>" + str_opt_sim
                     + "</select> seconds past the minute </span>")
                 .appendTo(this)
                 .data("root", this)
