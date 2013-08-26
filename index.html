@@ -30,20 +30,20 @@
     <script type="text/javascript">
     $(document).ready(function() {
         $('#example1').cron({
-            initial: "5 42 3 * * 5",
+            initial: "5 42 3 * * ?",
             onChange: function() {
                 $('#example1-val').text($(this).cron("value"));
             }
         });
         $('#example2').cron({
-            initial: "0 42 3 * * 5",
+            initial: "5 42 3 * * ?",
             effectOpts: {
                 openEffect: "fade",
                 openSpeed: "slow"
             }
         });
         $('#example3').cron({
-            initial: "0 42 3 * * 5",
+            initial: "5 42 3 * * ?",
             onChange: function() {
                 $('#example3-val').text($(this).cron("value"));
             },
@@ -53,7 +53,7 @@
             }
         });
         $('#example4').cron({
-            initial: "0 42 3 * * 5",
+            initial: "5 42 3 * * ?",
             onChange: function() {
                 $('#example4-val').text($(this).cron("value"));
             },

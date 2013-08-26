@@ -28,8 +28,9 @@
  *
  * Notes:
  * At this stage, we only support a subset of possible cron options.
- * For example, each cron entry can only be digits or "*", no commas
- * to denote multiple entries. We also limit the allowed combinations:
+ * For example, each cron entry can only be digits (x), ? ("no specific value")
+ * or "*", no commas to denote multiple entries.
+ * We also limit the allowed combinations:
  * - Every second : * * * * * ?
  * - Every minute : x * * * * ?
  * - Every hour   : x x * * * ?
@@ -41,7 +42,7 @@
 (function($) {
 
     var defaults = {
-        initial : "* * * * * *",
+        initial : "* * * * * ?",
         minuteOpts : {
             minWidth  : 100, // only applies if columns and itemWidth not set
             itemWidth : 30,
@@ -173,13 +174,13 @@
     };
 
     var combinations = {
-        "second" : /^(\*\s){5}\*$/,                    // "* * * * * *"
-        "minute" : /^\*\s\d{1,2}\s(\*\s){4}\*$/,       // "* ? * * * *"
-        "hour"   : /^(\d{1,2}\s){2}(\*\s){3}\*$/,      // "? ? * * * *"
-        "day"    : /^(\d{1,2}\s){3}(\*\s){2}\*$/,      // "? ? ? * * *"
-        "week"   : /^(\d{1,2}\s){3}(\*\s){2}\d{1,2}$/, // "? ? ? * * ?"
-        "month"  : /^(\d{1,2}\s){4}\*\s\*$/,           // "? ? ? ? * *"
-        "year"   : /^(\d{1,2}\s){5}\*$/                // "? ? ? ? ? *"
+        "second" : /^(\*\s){5}\?$/,                    // "* * * * * ?"
+        "minute" : /^\d{1,2}\s(\*\s){4}\?$/,           // "x * * * * ?"
+        "hour"   : /^(\d{1,2}\s){2}(\*\s){3}\?$/,      // "x x * * * ?"
+        "day"    : /^(\d{1,2}\s){3}(\*\s){2}\?$/,      // "x x x * * ?"
+        "week"   : /^(\d{1,2}\s){3}\?\s\*\s\d{1,2}$/,  // "x x x ? * x"
+        "month"  : /^(\d{1,2}\s){4}\*\s\?$/,           // "x x x x * ?"
+        "year"   : /^(\d{1,2}\s){5}\?$/                // "x x x x x ?"
     };
 
     // ------------------ internal functions ---------------
@@ -194,7 +195,7 @@
 
     function getCronType(cron_str) {
         // check format of initial cron value
-        var valid_cron = /^((\d{1,2}|\*)\s){5}(\d{1,2}|\*)$/
+        var valid_cron = /^((\d{1,2}|\*)\s){3}(\*\s|\?\s|d{1,2}\s)(\d{1,2}|\*\s)(\?|d{1,2})$/
         if (typeof cron_str != "string" || !valid_cron.test(cron_str)) {
             $.error("cron: invalid initial value");
             return undefined;
@@ -205,7 +206,9 @@
         var minval = [0, 0,  0,  1,  1,  0];
         var maxval = [59, 59, 23, 31, 12,  6];
         for (var i = 0; i < d.length; i++) {
-            if (d[i] == "*") continue;
+            if (d[i] == "*" || d[i] == "?") {
+                continue;
+            }
             var v = parseInt(d[i]);
             if (defined(v) && v <= maxval[i] && v >= minval[i]) continue;
 
@@ -231,7 +234,8 @@
 
     function getCurrentValue(c) {
         var b = c.data("block");
-        var sec = min = hour = day = month = dow = "*";
+        var sec = min = hour = day = month = "*";
+        var dow = "?";
         var selectedPeriod = b["period"].find("select").val();
         switch (selectedPeriod) {
             case "second":
@@ -253,6 +257,7 @@
                 break;
 
             case "week":
+                day = "?";
                 sec  = b["time"].find("select.cron-time-sec").val();
                 min  = b["time"].find("select.cron-time-min").val();
                 hour = b["time"].find("select.cron-time-hour").val();
