@@ -195,9 +195,10 @@
 
     function getCronType(cron_str) {
         // check format of initial cron value
-        var valid_cron = /^((\d{1,2}|\*)\s){3}(\*\s|\?\s|d{1,2}\s)(\d{1,2}|\*\s)(\?|d{1,2})$/
+        var valid_cron = /^(\d{1,2}|\*)\s((\d{1,2}|\*)\s){2}(\*|\?|\d{1,2})\s(\d{1,2}|\*|\?)\s(\?|d{1,2})$/
         if (typeof cron_str != "string" || !valid_cron.test(cron_str)) {
-            $.error("cron: invalid initial value");
+            // TODO: fix error handling
+            // $.error("cron: invalid initial value");
             return undefined;
         }
         // check actual cron values
@@ -211,8 +212,8 @@
             }
             var v = parseInt(d[i]);
             if (defined(v) && v <= maxval[i] && v >= minval[i]) continue;
-
-            $.error("cron: invalid value found (col "+(i+1)+") in " + o.initial);
+            // TODO: fix error handling
+            // $.error("cron: invalid value found (col "+(i+1)+") in " + o.initial);
             return undefined;
         }
 
@@ -222,7 +223,8 @@
         }
 
         // unknown combination
-        $.error("cron: valid but unsupported cron format. sorry.");
+        // TODO: fix error handling
+        // $.error("cron: valid but unsupported cron format. sorry.");
         return undefined;
     }
 
@@ -622,5 +624,12 @@
             $.error( 'Method ' +  method + ' does not exist on jQuery.cron' );
         }
     };
-
+    $.fn.cron.isValidCron = function (cron_str) {
+        var t = getCronType(cron_str);
+        if (!defined(t)) {
+            return false;
+        } else {
+            return t;
+        }
+    };
 })(jQuery);
