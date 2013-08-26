@@ -83,6 +83,13 @@
             rows      : undefined,
             title     : "Time: Minute"
         },
+        timeSecondOpts : {
+            minWidth  : 100, // only applies if columns and itemWidth not set
+            itemWidth : 20,
+            columns   : 4,
+            rows      : undefined,
+            title     : "Time: Second"
+        },
         effectOpts : {
             openSpeed      : 400,
             closeSpeed     : 400,
@@ -226,31 +233,40 @@
         var sec = min = hour = day = month = dow = "*";
         var selectedPeriod = b["period"].find("select").val();
         switch (selectedPeriod) {
+            case "second":
+                break;
+
             case "minute":
+                sec = b["secs"].find("select").val();
                 break;
 
             case "hour":
+                sec = b["secs"].find("select").val();
                 min = b["mins"].find("select").val();
                 break;
 
             case "day":
+                sec  = b["time"].find("select.cron-time-sec").val();
                 min  = b["time"].find("select.cron-time-min").val();
                 hour = b["time"].find("select.cron-time-hour").val();
                 break;
 
             case "week":
+                sec  = b["time"].find("select.cron-time-sec").val();
                 min  = b["time"].find("select.cron-time-min").val();
                 hour = b["time"].find("select.cron-time-hour").val();
                 dow  =  b["dow"].find("select").val();
                 break;
 
             case "month":
+                sec  = b["time"].find("select.cron-time-sec").val();
                 min  = b["time"].find("select.cron-time-min").val();
                 hour = b["time"].find("select.cron-time-hour").val();
                 day  = b["dom"].find("select").val();
                 break;
 
             case "year":
+                sec  = b["time"].find("select.cron-time-sec").val();
                 min  = b["time"].find("select.cron-time-min").val();
                 hour = b["time"].find("select.cron-time-hour").val();
                 day  = b["dom"].find("select").val();
@@ -261,7 +277,7 @@
                 // we assume this only happens when customValues is set
                 return selectedPeriod;
         }
-        return [min, hour, day, month, dow].join(" ");
+        return [sec, min, hour, day, month, dow].join(" ");
     }
 
     // -------------------  PUBLIC METHODS -----------------
@@ -274,12 +290,14 @@
             var o = $.extend([], defaults, options);
             var eo = $.extend({}, defaults.effectOpts, options.effectOpts);
             $.extend(o, {
+                secondOpts     : $.extend({}, defaults.secondOpts, eo, options.secondOpts),
                 minuteOpts     : $.extend({}, defaults.minuteOpts, eo, options.minuteOpts),
                 domOpts        : $.extend({}, defaults.domOpts, eo, options.domOpts),
                 monthOpts      : $.extend({}, defaults.monthOpts, eo, options.monthOpts),
                 dowOpts        : $.extend({}, defaults.dowOpts, eo, options.dowOpts),
                 timeHourOpts   : $.extend({}, defaults.timeHourOpts, eo, options.timeHourOpts),
-                timeMinuteOpts : $.extend({}, defaults.timeMinuteOpts, eo, options.timeMinuteOpts)
+                timeMinuteOpts : $.extend({}, defaults.timeMinuteOpts, eo, options.timeMinuteOpts),
+                timeSecondOpts : $.extend({}, defaults.timeSecondOpts, eo, options.timeSecondOpts)
             });
 
             // error checking
@@ -349,6 +367,20 @@
             block["mins"] = block["mins"].data("root", this)
                                          .end();
 
+            block["secs"] = $("<span class='cron-block cron-block-secs'>"
+                    + " at <select name='cron-secs'>" + str_opt_sim
+                    + "</select> seconds past the minute </span>")
+                .appendTo(this)
+                .data("root", this)
+                .find("select");
+
+            if (o.useGentleSelect) {
+                block["secs"].gentleSelect(o.minuteOpts);
+            }
+
+            block["secs"] = block["secs"].data("root", this)
+                                         .end();
+
             block["dow"] = $("<span class='cron-block cron-block-dow'>"
                     + " on <select name='cron-dow'>" + str_opt_dow
                     + "</select> </span>")
@@ -366,7 +398,8 @@
             block["time"] = $("<span class='cron-block cron-block-time'>"
                     + " at <select name='cron-time-hour' class='cron-time-hour'>" + str_opt_hid
                     + "</select>:<select name='cron-time-min' class='cron-time-min'>" + str_opt_mih
-                    + " </span>")
+                    + "</select>:<select name='cron-time-sec' class='cron-time-sec'>" + str_opt_sim
+                    + "</select></span>")
                 .appendTo(this)
                 .data("root", this)
                 .find("select.cron-time-hour");
@@ -375,13 +408,20 @@
                 block["time"].gentleSelect(o.timeHourOpts);
             }
 
-            block["time"] = block["time"]
-                            .data("root", this)
-                            .end()
-                            .find("select.cron-time-min");
+            block["time"] = block["time"].data("root", this)
+                                         .end()
+                                         .find("select.cron-time-min");
 
             if (o.useGentleSelect) {
                 block["time"].gentleSelect(o.timeMinuteOpts);
+            }
+
+            block["time"] = block["time"].data("root", this)
+                                         .end()
+                                         .find("select.cron-time-sec");
+
+            if (o.useGentleSelect) {
+                block["time"].gentleSelect(o.timeSecondOpts)
             }
 
             block["time"] = block["time"].data("root", this)
@@ -414,11 +454,12 @@
             var block = this.data("block");
             var d = cron_str.split(" ");
             var v = {
-                "mins"  : d[0],
-                "hour"  : d[1],
-                "dom"   : d[2],
-                "month" : d[3],
-                "dow"   : d[4]
+                "secs"  : d[0],
+                "mins"  : d[1],
+                "hour"  : d[2],
+                "dom"   : d[3],
+                "month" : d[4],
+                "dow"   : d[5]
             };
 
             // is gentleSelect enabled
@@ -432,15 +473,25 @@
                     var btgt = block[tgt].find("select.cron-time-hour")
                                          .val(v["hour"]);
 
-                    if (useGentleSelect)
+                    if (useGentleSelect) {
                         btgt.gentleSelect("update");
+                    }
 
                     btgt = btgt.end()
                                .find("select.cron-time-min")
                                .val(v["mins"]);
 
-                    if (useGentleSelect)
+                    if (useGentleSelect) {
                         btgt.gentleSelect("update");
+                    }
+
+                    btgt = btgt.end()
+                               .find("select.cron-time-sec")
+                               .val(v["secs"]);
+
+                    if (useGentleSelect) {
+                        btgt.gentleSelect("update");
+                    }
 
                     btgt.end();
                 } else {;
