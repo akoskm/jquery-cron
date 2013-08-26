@@ -40,7 +40,7 @@
 (function($) {
 
     var defaults = {
-        initial : "* * * * *",
+        initial : "* * * * * *",
         minuteOpts : {
             minWidth  : 100, // only applies if columns and itemWidth not set
             itemWidth : 30,
@@ -98,6 +98,13 @@
 
     // -------  build some static data -------
 
+    // options for seconds in a minute
+    var str_opt_sim = "";
+    for (var i = 0; i < 60; i++) {
+        var j = (i < 10)? "0":"";
+        str_opt_sim += "<option value='"+i+"'>" + j +  i + "</option>\n";
+    }
+
     // options for minutes in an hour
     var str_opt_mih = "";
     for (var i = 0; i < 60; i++) {
@@ -148,7 +155,8 @@
 
     // display matrix
     var toDisplay = {
-        "minute" : [],
+        "second" : [],
+        "minute" : ["secs"],
         "hour"   : ["mins"],
         "day"    : ["time"],
         "week"   : ["dow", "time"],
@@ -157,12 +165,13 @@
     };
 
     var combinations = {
-        "minute" : /^(\*\s){4}\*$/,                    // "* * * * *"
-        "hour"   : /^\d{1,2}\s(\*\s){3}\*$/,           // "? * * * *"
-        "day"    : /^(\d{1,2}\s){2}(\*\s){2}\*$/,      // "? ? * * *"
-        "week"   : /^(\d{1,2}\s){2}(\*\s){2}\d{1,2}$/, // "? ? * * ?"
-        "month"  : /^(\d{1,2}\s){3}\*\s\*$/,           // "? ? ? * *"
-        "year"   : /^(\d{1,2}\s){4}\*$/                // "? ? ? ? *"
+        "second" : /^(\*\s){5}\*$/,                    // "* * * * * *"
+        "minute" : /^\*\s\d{1,2}\s(\*\s){4}\*$/,       // "* ? * * * *"
+        "hour"   : /^(\d{1,2}\s){2}(\*\s){3}\*$/,      // "? ? * * * *"
+        "day"    : /^(\d{1,2}\s){3}(\*\s){2}\*$/,      // "? ? ? * * *"
+        "week"   : /^(\d{1,2}\s){3}(\*\s){2}\d{1,2}$/, // "? ? ? * * ?"
+        "month"  : /^(\d{1,2}\s){4}\*\s\*$/,           // "? ? ? ? * *"
+        "year"   : /^(\d{1,2}\s){5}\*$/                // "? ? ? ? ? *"
     };
 
     // ------------------ internal functions ---------------
@@ -177,16 +186,16 @@
 
     function getCronType(cron_str) {
         // check format of initial cron value
-        var valid_cron = /^((\d{1,2}|\*)\s){4}(\d{1,2}|\*)$/
+        var valid_cron = /^((\d{1,2}|\*)\s){5}(\d{1,2}|\*)$/
         if (typeof cron_str != "string" || !valid_cron.test(cron_str)) {
             $.error("cron: invalid initial value");
             return undefined;
         }
         // check actual cron values
         var d = cron_str.split(" ");
-        //            mm, hh, DD, MM, DOW
-        var minval = [ 0,  0,  1,  1,  0];
-        var maxval = [59, 23, 31, 12,  6];
+        //        ss, mm, hh, DD, MM, DOW
+        var minval = [0, 0,  0,  1,  1,  0];
+        var maxval = [59, 59, 23, 31, 12,  6];
         for (var i = 0; i < d.length; i++) {
             if (d[i] == "*") continue;
             var v = parseInt(d[i]);
@@ -214,7 +223,7 @@
 
     function getCurrentValue(c) {
         var b = c.data("block");
-        var min = hour = day = month = dow = "*";
+        var sec = min = hour = day = month = dow = "*";
         var selectedPeriod = b["period"].find("select").val();
         switch (selectedPeriod) {
             case "minute":
@@ -292,8 +301,9 @@
                 .bind("change.cron", event_handlers.periodChanged)
                 .data("root", this);
 
-            if (o.useGentleSelect)
+            if (o.useGentleSelect) {
                 block["period"].gentleSelect(eo);
+            }
 
             block["period"] = block["period"].end();
 
@@ -304,8 +314,9 @@
                 .data("root", this)
                 .find("select");
 
-            if (o.useGentleSelect)
+            if (o.useGentleSelect) {
                 block["dom"].gentleSelect(o.domOpts);
+            }
 
             block["dom"] = block["dom"].data("root", this)
                                        .end();
@@ -317,8 +328,9 @@
                 .data("root", this)
                 .find("select");
 
-            if (o.useGentleSelect)
+            if (o.useGentleSelect) {
                 block["month"].gentleSelect(o.monthOpts);
+            }
 
             block["month"] = block["month"].data("root", this)
                                            .end();
@@ -330,8 +342,9 @@
                 .data("root", this)
                 .find("select");
 
-            if (o.useGentleSelect)
+            if (o.useGentleSelect) {
                 block["mins"].gentleSelect(o.minuteOpts);
+            }
 
             block["mins"] = block["mins"].data("root", this)
                                          .end();
@@ -343,8 +356,9 @@
                 .data("root", this)
                 .find("select");
 
-            if (o.useGentleSelect)
+            if (o.useGentleSelect) {
                 block["dow"].gentleSelect(o.dowOpts);
+            }
 
             block["dow"] = block["dow"].data("root", this)
                                        .end();
@@ -357,16 +371,18 @@
                 .data("root", this)
                 .find("select.cron-time-hour");
 
-            if (o.useGentleSelect)
+            if (o.useGentleSelect) {
                 block["time"].gentleSelect(o.timeHourOpts);
+            }
 
             block["time"] = block["time"]
                             .data("root", this)
                             .end()
                             .find("select.cron-time-min");
 
-            if (o.useGentleSelect)
+            if (o.useGentleSelect) {
                 block["time"].gentleSelect(o.timeMinuteOpts);
+            }
 
             block["time"] = block["time"].data("root", this)
                                          .end();
