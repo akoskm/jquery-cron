@@ -157,7 +157,7 @@
 
     // options for period
     var str_opt_period = "";
-    var periods = ["minute", "hour", "day", "week", "month", "year"];
+    var periods = ["second", "minute", "hour", "day", "week", "month", "year"];
     for (var i = 0; i < periods.length; i++) {
         str_opt_period += "<option value='"+periods[i]+"'>" + periods[i] + "</option>\n";
     }
