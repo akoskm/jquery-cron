@@ -202,7 +202,7 @@
         }
         // check actual cron values
         var d = cron_str.split(" ");
-        //        ss, mm, hh, DD, MM, DOW
+        // ss, mm, hh, DD, MM, DOW
         var minval = [0, 0,  0,  1,  1,  0];
         var maxval = [59, 59, 23, 31, 12,  6];
         for (var i = 0; i < d.length; i++) {
@@ -317,6 +317,9 @@
                     custom_periods += "<option value='" + cv[key] + "'>" + key + "</option>\n";
                 }
             }
+
+            // ---- period selection ----
+
             block["period"] = $("<span class='cron-period'>"
                     + "Every <select name='cron-period'>" + custom_periods
                     + str_opt_period + "</select> </span>")
@@ -330,6 +333,8 @@
             }
 
             block["period"] = block["period"].end();
+
+            // ---- day of month selection ----
 
             block["dom"] = $("<span class='cron-block cron-block-dom'>"
                     + " on the <select name='cron-dom'>" + str_opt_dom
@@ -345,6 +350,8 @@
             block["dom"] = block["dom"].data("root", this)
                                        .end();
 
+            // ---- month selection ----
+
             block["month"] = $("<span class='cron-block cron-block-month'>"
                     + " of <select name='cron-month'>" + str_opt_month
                     + "</select> </span>")
@@ -358,6 +365,9 @@
 
             block["month"] = block["month"].data("root", this)
                                            .end();
+
+
+            // ---- minutes selection ----
 
             block["mins"] = $("<span class='cron-block cron-block-mins'>"
                     + " at <select name='cron-mins'>" + str_opt_mih
@@ -373,6 +383,8 @@
             block["mins"] = block["mins"].data("root", this)
                                          .end();
 
+            // ---- seconds selection ----
+
             block["secs"] = $("<span class='cron-block cron-block-secs'>"
                     + " at <select name='cron-secs'>" + str_opt_sim
                     + "</select> seconds past the minute </span>")
@@ -387,6 +399,8 @@
             block["secs"] = block["secs"].data("root", this)
                                          .end();
 
+            // ---- day of week selection ----
+
             block["dow"] = $("<span class='cron-block cron-block-dow'>"
                     + " on <select name='cron-dow'>" + str_opt_dow
                     + "</select> </span>")
@@ -400,6 +414,8 @@
 
             block["dow"] = block["dow"].data("root", this)
                                        .end();
+
+            // ---- time block selection ----
 
             block["time"] = $("<span class='cron-block cron-block-time'>"
                     + " at <select name='cron-time-hour' class='cron-time-hour'>" + str_opt_hid
@@ -432,6 +448,8 @@
 
             block["time"] = block["time"].data("root", this)
                                          .end();
+
+            // ---- control ----
 
             block["controls"] = $("<span class='cron-controls'>&laquo; save "
                     + "<span class='cron-button cron-button-save'></span>"
