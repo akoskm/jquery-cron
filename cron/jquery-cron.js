@@ -30,12 +30,13 @@
  * At this stage, we only support a subset of possible cron options.
  * For example, each cron entry can only be digits or "*", no commas
  * to denote multiple entries. We also limit the allowed combinations:
- * - Every minute : * * * * *
- * - Every hour   : ? * * * *
- * - Every day    : ? ? * * *
- * - Every week   : ? ? * * ?
- * - Every month  : ? ? ? * *
- * - Every year   : ? ? ? ? *
+ * - Every second : * * * * * ?
+ * - Every minute : x * * * * ?
+ * - Every hour   : x x * * * ?
+ * - Every day    : x x x * * ?
+ * - Every week   : x x x ? * x
+ * - Every month  : x x x x * ?
+ * - Every year   : x x x x x ?
  */
 (function($) {
 
